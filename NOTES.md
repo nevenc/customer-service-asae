@@ -32,3 +32,54 @@ http https://production-customer-service.azuremicroservices.io/customers name="J
 http https://production-customer-service.azuremicroservices.io/customers
 ```
 
+- You can create a new PostgreSQL flexible-server by
+
+```
+az postgres flexible-server create \
+  --resource-group ${RESOURCE_GROUP} \
+  --location ${REGION} \
+  --name ${DATABASE_SERVER} \
+  --admin-user ${DATABASE_USER} \
+  --admin-password ${DATABASE_PASSWORD} \
+  --sku-name Standard_B1ms \
+  --tier Burstable \
+  --storage-size 32 
+  --yes
+```
+
+- We can create a database in PostgreSQL server by
+
+```
+az postgres flexible-server db create \
+  --database-name ${DATABASE_NAME} \
+  --server-name ${DATABASE_SERVER}
+```
+
+- We can create an application connection to PostgreSQL database by
+
+```
+az spring connection create postgres-flexible \
+  --app customer-service \
+  --server ${DATABASE_SERVER} \
+  --secret name=${DATABASE_USER} secret="${DATABASE_PASSWORD}" \
+  --resource-group ${RESOURCE_GROUP} \
+  --service ${SPRING_APPS_SERVICE} \
+  --target-resource-group ${RESOURCE_GROUP} \
+  --database ${DATABASE_NAME} \
+  --client-type=springBoot \
+  --connection customer_database_connection \
+
+```
+
+- We need to restart the application by
+
+```
+az spring app stop --name customer-service
+az spring app start --name customer-service
+```
+
+- We can observe the logs by
+
+```
+az spring app logs --name customer-service -f
+```
